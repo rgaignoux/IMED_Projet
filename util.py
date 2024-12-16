@@ -4,7 +4,7 @@ def divide(points, n,d):
     left = []
     right = []
 
-    for point in point:
+    for point in points:
         if np.dot(n, point-d)<0:
             left.append(point)
         else:

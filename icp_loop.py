@@ -20,22 +20,27 @@ def ICP(name):
     data = reader.GetOutput()
     
     
-    # INITIALISATION article [10]
-    newP = (n0,d0) #initialiser à n'importe quoi
-    P = (n,d) #initialiser normalement
-    
+    # INITIALISATION 
+    # les plans sont définis par un point d et un vecteur normal n
+    newP = (n0,d0) # pour avoir une valeur à comparer dans la première boucle
+    P = (n,d) # article [10], ou calculer centre de masse des points + orientation random
+
+
+    # points =    #trouver comment sortir une liste des points 3D de data
     # icp loop
     while d != d0 or np.det(n,n0) != 0 : # tant que P bouge
         
         left, right = u.divide(points, n, d) # ensemble de points à gauche (droite) du plan (n,d)
 
-        # pour chaque point à gauche du plan, match le plus proche à sa symétrie à droite du plan
+        # pour chaque point à gauche du plan, match le plus proche à son symétrique à droite du plan
         y = []
         for elem in left : # à gauche du plan par exemple
-            coord, i = u.closest(elem[0],elem[1], right)
+            coord, i = u.closest(point, n, d, right)
             y.append(coord)
         y = np.array(y)
         
+        # calculer la distance
+
         # compute nouveau plan de symmetrie
         P = newP
         newP = (new_n, new_d) # compute nouveau n et nouveau d
