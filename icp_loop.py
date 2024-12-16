@@ -39,7 +39,9 @@ def ICP(name):
             y.append(coord)
         y = np.array(y)
         
-        # calculer la distance
+        # calculer le plan
+        xg = np.mean(left)
+        yg = np.mean(right)
 
         # compute nouveau plan de symmetrie
         P = newP
