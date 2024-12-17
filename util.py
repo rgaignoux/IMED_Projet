@@ -5,12 +5,12 @@ def divide(points, n,d):
     right = []
 
     for point in points:
-        if np.dot(n, point) - d < 0:
+        if np.dot(n, point) + d < 0:
             left.append(point)
         else:
             right.append(point)
 
-    return(left, right)
+    return np.array(left), np.array(right)
 
 
 def closest_sym(pt_left, n, d, pts_right):

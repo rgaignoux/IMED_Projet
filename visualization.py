@@ -2,18 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-
-def divide(points, n,d):
-    left = []
-    right = []
-
-    for point in points:
-        if np.dot(n, point) - d < 0:
-            left.append(point)
-        else:
-            right.append(point)
-
-    return(left, right)
+import util
 
 def plot_plane(ax, normal, d, xlim, ylim):
     normal = np.array(normal)
@@ -27,7 +16,7 @@ def plot_plane(ax, normal, d, xlim, ylim):
 
     return ax.plot_surface(x, y, z, alpha=0.7, cmap='viridis', edgecolor='none')
 
-def interactive_plane_update(normal, d, data, xyz_min, xyz_max):   
+def interactive_plane_update(n, d, points, xyz_min, xyz_max):   
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
 
@@ -35,14 +24,9 @@ def interactive_plane_update(normal, d, data, xyz_min, xyz_max):
     ylim = (xyz_min[1], xyz_max[1])
     zlim = (xyz_min[2], xyz_max[2])
 
-    ax.set_xlim(xlim)
-    ax.set_ylim(ylim)
-    ax.set_zlim(zlim)
     ax.set_xlabel('X')
     ax.set_ylabel('Y')
     ax.set_zlabel('Z')
-
-    ax.scatter(data[:, 0], data[:, 1], data[:, 2], c='red', s=1)
     
     plt.ion()
     plane = None
@@ -51,15 +35,21 @@ def interactive_plane_update(normal, d, data, xyz_min, xyz_max):
 
     try:
         while plt.fignum_exists(fig.number):
-            if plane:
-                plane.remove()
-            plane = plot_plane(ax, normal, d, xlim, ylim)
+            ax.clear()
+            ax.set_xlim(xlim)
+            ax.set_ylim(ylim)
+            ax.set_zlim(zlim)
+
+            left, right = util.divide(points, n, d)
+            ax.scatter(left[:, 0], left[:, 1], left[:, 2], c='red', s=1)
+            ax.scatter(right[:, 0], right[:, 1], right[:, 2], c='green', s=1)
+
+            plane = plot_plane(ax, n, d, xlim, ylim)
             plt.draw()
             plt.pause(0.5)
-            normal[0] += 1
+            n[0] += 1
             
-            if nb_iterations > 25:
-                break
+            nb_iterations += 1
 
     except KeyboardInterrupt:
         pass
@@ -69,14 +59,14 @@ def interactive_plane_update(normal, d, data, xyz_min, xyz_max):
         plt.close(fig)
 
 csv_file = "Visage_symetrique_decimated.csv"
-data = pd.read_csv(csv_file).to_numpy()
+points = pd.read_csv(csv_file).to_numpy()
 
-xyz_min = np.min(data, axis=0)
-xyz_max = np.max(data, axis=0)
+xyz_min = np.min(points, axis=0)
+xyz_max = np.max(points, axis=0)
 
 # Step 0
 normal = [5, 2, 3]
-d = np.linalg.norm(data.mean(axis=0))
+d = np.linalg.norm(points.mean(axis=0))
 print(d)
 
-interactive_plane_update(normal, d, data, xyz_min, xyz_max)
+interactive_plane_update(normal, d, points, xyz_min, xyz_max)
