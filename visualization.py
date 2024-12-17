@@ -3,6 +3,18 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
+def divide(points, n,d):
+    left = []
+    right = []
+
+    for point in points:
+        if np.dot(n, point) - d < 0:
+            left.append(point)
+        else:
+            right.append(point)
+
+    return(left, right)
+
 def plot_plane(ax, normal, d, xlim, ylim):
     normal = np.array(normal)
     a, b, c = normal
@@ -30,7 +42,7 @@ def interactive_plane_update(normal, d, data, xyz_min, xyz_max):
     ax.set_ylabel('Y')
     ax.set_zlabel('Z')
 
-    ax.scatter(data[:, 0], data[:, 1], data[:, 2], c='red', s=10)
+    ax.scatter(data[:, 0], data[:, 1], data[:, 2], c='red', s=1)
     
     plt.ion()
     plane = None
@@ -66,6 +78,5 @@ xyz_max = np.max(data, axis=0)
 normal = [5, 2, 3]
 d = np.linalg.norm(data.mean(axis=0))
 print(d)
-
 
 interactive_plane_update(normal, d, data, xyz_min, xyz_max)

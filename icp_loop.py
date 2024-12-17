@@ -34,8 +34,9 @@ def ICP(name):
 
         # pour chaque point à gauche du plan, match le plus proche à son symétrique à droite du plan
         y = []
+        x = []
         for elem in left : # à gauche du plan par exemple
-            coord, i = u.closest(point, n, d, right)
+            coord, i = u.closest_sym(point, n, d, right)
             y.append(coord)
         y = np.array(y)
         
