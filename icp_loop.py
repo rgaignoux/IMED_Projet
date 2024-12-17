@@ -52,7 +52,7 @@ def ICP(name):
         yg = np.mean(right)
         A = np.zeros((3,3))
         for i in range (len(left)) :
-            A = A + (left[i] - xg + y[i] - yg) * (left[i] - xg + y[i] - yg).T - (left[i] - y[i])(left[i] - y[i]).T
+            A = A + (left[i] - xg + y[i] - yg) * (left[i] - xg + y[i] - yg).T - (left[i] - y[i]) * (left[i] - y[i]).T
 
         print("fin boucle A")
 
