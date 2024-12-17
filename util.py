@@ -24,5 +24,5 @@ def closest_sym(pt_left, n, d, pts_right):
         if np.linalg.norm(pt_symm_right, pt_right) < np.linalg.norm(pt_symm_right, pt_right_min):
             pt_right_min = pt_right
 
-    found = !(len(pts_right) == 0)
+    found = not len(pts_right) == 0
     return (found, pt_right_min)

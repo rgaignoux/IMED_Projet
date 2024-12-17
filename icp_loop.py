@@ -1,6 +1,7 @@
 import vtk
 import numpy as np
 import util as u
+import pandas as pd
 
 def ICP(name):
     """Compute ICP for point clouds in the image 'name'
@@ -18,11 +19,16 @@ def ICP(name):
     reader.SetFileName("" + name + ".vtk")
     reader.Update()
     data = reader.GetOutput()
-    
+    points = pd.read_csv(name).to_numpy()
+
     
     # INITIALISATION 
     # les plans sont définis par un point d et un vecteur normal n
+    n0 = np.array([1,1,1])
+    d0 = 0
     newP = (n0,d0) # pour avoir une valeur à comparer dans la première boucle
+    n = np.array([0,0,1])
+    d = abs(np.dot(np.mean(points),n))
     P = (n,d) # article [10], ou calculer centre de masse des points + orientation random
 
 
@@ -34,8 +40,7 @@ def ICP(name):
 
         # pour chaque point à gauche du plan, match le plus proche à son symétrique à droite du plan
         y = []
-        x = []
-        for elem in left : # à gauche du plan par exemple
+        for point in left : # à gauche du plan par exemple
             coord, i = u.closest_sym(point, n, d, right)
             y.append(coord)
         y = np.array(y)
@@ -43,7 +48,19 @@ def ICP(name):
         # calculer le plan
         xg = np.mean(left)
         yg = np.mean(right)
+        A = np.zeros((3,3))
+        for i in range (len(left)) :
+            A = A + (left[i] - xg + y[i] - yg) * (left[i] - xg + y[i] - yg).T - (left[i] - y[i])(left[i] - y[i]).T
 
+        eig = np.linalg.eig(A)
+        val_min = eig.eigenvalues[0]
+        for i in range(1,3):
+            if eig.eigenvalues[i] < val_min:
+                val_min = eig.eigenvalues[i]
+                new_n = eig.eigenvectors[i]
+        
+        new_d = 1/2 * (xg +yg).T * n
+        
         # compute nouveau plan de symmetrie
         P = newP
         newP = (new_n, new_d) # compute nouveau n et nouveau d
