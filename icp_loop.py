@@ -15,10 +15,6 @@ def ICP(name):
     -------
     
     """
-    reader = vtk.vtkUnstructuredGridReader()
-    reader.SetFileName("" + name + ".vtk")
-    reader.Update()
-    data = reader.GetOutput()
     points = pd.read_csv(name).to_numpy()
 
     
@@ -28,29 +24,37 @@ def ICP(name):
     d0 = 0
     newP = (n0,d0) # pour avoir une valeur à comparer dans la première boucle
     n = np.array([0,0,1])
-    d = abs(np.dot(np.mean(points),n))
+    d = np.linalg.norm(points.mean(axis=0))
     P = (n,d) # article [10], ou calculer centre de masse des points + orientation random
 
 
     # points =    #trouver comment sortir une liste des points 3D de data
     # icp loop
-    while d != d0 or np.det(n,n0) != 0 : # tant que P bouge
+    while d != d0 or np.dot(n,n0) != 0 : # tant que P bouge
         
+        print("début")
+
         left, right = u.divide(points, n, d) # ensemble de points à gauche (droite) du plan (n,d)
+
+        print("fin divide")
 
         # pour chaque point à gauche du plan, match le plus proche à son symétrique à droite du plan
         y = []
         for point in left : # à gauche du plan par exemple
-            coord, i = u.closest_sym(point, n, d, right)
-            y.append(coord)
+            pt = u.closest_sym(point, n, d, right)
+            y.append(pt)
         y = np.array(y)
         
+        print("fin boucle paires")
+
         # calculer le plan
         xg = np.mean(left)
         yg = np.mean(right)
         A = np.zeros((3,3))
         for i in range (len(left)) :
             A = A + (left[i] - xg + y[i] - yg) * (left[i] - xg + y[i] - yg).T - (left[i] - y[i])(left[i] - y[i]).T
+
+        print("fin boucle A")
 
         eig = np.linalg.eig(A)
         val_min = eig.eigenvalues[0]
@@ -60,9 +64,12 @@ def ICP(name):
                 new_n = eig.eigenvectors[i]
         
         new_d = 1/2 * (xg +yg).T * n
-        
+
         # compute nouveau plan de symmetrie
         P = newP
         newP = (new_n, new_d) # compute nouveau n et nouveau d
+
+        print("n : ", new_n)
+        print("d : ", d)
     
     return (n, d)
